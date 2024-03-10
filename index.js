@@ -1,64 +1,35 @@
-const yargs = require("yargs");
-const contacts = require("./contacts");
 
-const argv = yargs
-  .command({
-    command: "list",
-    describe: "List all contacts",
-    handler: () => {
-      contacts.listContacts();
-    },
-  })
-  .command({
-    command: "get",
-    describe: "Get contact by ID",
-    builder: {
-      id: {
-        describe: "Contact ID",
-        demandOption: true,
-        type: "string",
-      },
-    },
-    handler: (argv) => {
-      contacts.getContactById(argv.id);
-    },
-  })
-  .command({
-    command: "add",
-    describe: "Add a new contact",
-    builder: {
-      name: {
-        describe: "Contact name",
-        demandOption: true,
-        type: "string",
-      },
-      email: {
-        describe: "Contact email",
-        demandOption: true,
-        type: "string",
-      },
-      phone: {
-        describe: "Contact phone",
-        demandOption: true,
-        type: "string",
-      },
-    },
-    handler: (argv) => {
-      contacts.addContact(argv.name, argv.email, argv.phone);
-    },
-  })
-  .command({
-    command: "remove",
-    describe: "Remove contact by ID",
-    builder: {
-      id: {
-        describe: "Contact ID",
-        demandOption: true,
-        type: "string",
-      },
-    },
-    handler: (argv) => {
-      contacts.removeContact(argv.id);
-    },
-  })
-  .help().argv;
+const argv = require("yargs").argv;
+const { listContacts, getContactById, removeContact, addContact } = require('./contacts');
+
+
+listContacts(); 
+getContactById(1); 
+removeContact(2); 
+addContact('John Doe', 'john@example.com', '123456789'); 
+
+
+function invokeAction({ action, id, name, email, phone }) {
+  switch (action) {
+    case "list":
+      listContacts();
+      break;
+
+    case "get":
+      getContactById(id);
+      break;
+
+    case "add":
+      addContact(name, email, phone);
+      break;
+
+    case "remove":
+      removeContact(id);
+      break;
+
+    default:
+      console.warn("\x1B[31m Unknown action type!");
+  }
+}
+
+invokeAction(argv);

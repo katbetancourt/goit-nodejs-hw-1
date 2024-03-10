@@ -1,98 +1,88 @@
+// Importa los módulos fs y path para trabajar con el sistema de archivos.
 const fs = require("fs");
 const path = require("path");
 
-const contactsPath = path.join(__dirname, "contacts.json");
+// Crea una variable contactsPath y escribe en ella la ruta al archivo contacts.json.
+const contactsPath = path.join(__dirname, "db", "contacts.json");
 
+// Añade funciones para trabajar con la colección de contactos.
 function listContacts() {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  // Lee el archivo contacts.json y muestra los contactos.
+  fs.readFile(contactsPath, "utf-8", (err, data) => {
     if (err) {
-      console.error("Error reading contacts file:", err);
+      console.error(err);
       return;
     }
-    try {
-      const contacts = JSON.parse(data);
-      console.log("Contacts list:");
-      console.table(contacts);
-    } catch (error) {
-      console.error("Error parsing contacts JSON:", error);
-    }
+    console.log(JSON.parse(data));
   });
 }
 
 function getContactById(contactId) {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  // Lee el archivo contacts.json, busca el contacto con el ID proporcionado y lo muestra.
+  fs.readFile(contactsPath, "utf-8", (err, data) => {
     if (err) {
-      console.error("Error reading contacts file:", err);
+      console.error(err);
       return;
     }
-    try {
-      const contacts = JSON.parse(data);
-      const contact = contacts.find((c) => c.id === contactId);
-      if (contact) {
-        console.log("Contact found:");
-        console.table(contact);
-      } else {
-        console.log("Contact not found.");
-      }
-    } catch (error) {
-      console.error("Error parsing contacts JSON:", error);
-    }
+    const contacts = JSON.parse(data);
+    const contact = contacts.find((contact) => contact.id === contactId);
+    console.log(contact);
   });
 }
 
 function removeContact(contactId) {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  // Lee el archivo contacts.json, elimina el contacto con el ID proporcionado y guarda los cambios.
+  fs.readFile(contactsPath, "utf-8", (err, data) => {
     if (err) {
-      console.error("Error reading contacts file:", err);
+      console.error(err);
       return;
     }
-    try {
-      let contacts = JSON.parse(data);
-      const index = contacts.findIndex((c) => c.id === contactId);
-      if (index !== -1) {
-        contacts.splice(index, 1);
-        fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2), (err) => {
-          if (err) {
-            console.error("Error writing contacts file:", err);
-            return;
-          }
-          console.log("Contact removed successfully.");
-        });
-      } else {
-        console.log("Contact not found.");
+    const contacts = JSON.parse(data);
+    const updatedContacts = contacts.filter(
+      (contact) => contact.id !== contactId
+    );
+    fs.writeFile(
+      contactsPath,
+      JSON.stringify(updatedContacts, null, 2),
+      (err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log("Contacto eliminado exitosamente.");
       }
-    } catch (error) {
-      console.error("Error parsing contacts JSON:", error);
-    }
+    );
   });
 }
 
 function addContact(name, email, phone) {
-  fs.readFile(contactsPath, "utf8", (err, data) => {
+  // Lee el archivo contacts.json, agrega un nuevo contacto, y guarda los cambios.
+  fs.readFile(contactsPath, "utf-8", (err, data) => {
     if (err) {
-      console.error("Error reading contacts file:", err);
+      console.error(err);
       return;
     }
-    try {
-      let contacts = JSON.parse(data);
-      const newContact = { id: Date.now().toString(), name, email, phone };
-      contacts.push(newContact);
-      fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2), (err) => {
+    const contacts = JSON.parse(data);
+    const newContact = {
+      id: contacts.length + 1,
+      name,
+      email,
+      phone,
+    };
+    const updatedContacts = [...contacts, newContact];
+    fs.writeFile(
+      contactsPath,
+      JSON.stringify(updatedContacts, null, 2),
+      (err) => {
         if (err) {
-          console.error("Error writing contacts file:", err);
+          console.error(err);
           return;
         }
-        console.log("Contact added successfully.");
-      });
-    } catch (error) {
-      console.error("Error parsing contacts JSON:", error);
-    }
+        console.log("Contacto añadido exitosamente.");
+      }
+    );
   });
 }
 
-module.exports = {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-};
+// Exporta las funciones creadas mediante module.exports.
+module.exports = { listContacts, getContactById, removeContact, addContact };
